@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  backend:
+    build: .
+    container_name: bpmn_backend
+    command: uvicorn final_service:app --host 0.0.0.0 --port 8000
+    volumes:
+      # Пробрасываем папку models внутрь контейнера
+      - ./models:/models
+    environment:
+      - DOCKER_ENV=true
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build: .
+    container_name: bpmn_frontend
+    command: streamlit run ui.py --server.port 8501
+    environment:
+      # Фронт обращается к бэку по имени сервиса "backend"
+      - API_URL=http://backend:8000
+    ports:
+      - "8501:8501"
+    depends_on:
+      - backend
